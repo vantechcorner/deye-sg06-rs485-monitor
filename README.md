@@ -2,7 +2,8 @@
 
 Field tools to **monitor** a Deye SG05/SG06 hybrid inverter over **Modbus RTU (RS485)**: IRIV IOC MQTT templates, ESPHome example, PC/emulator slaves, and (planned) ESP32 UART→RS485 poller.
 
-> Vietnamese: [README-vn.md](README-vn.md)
+> Vietnamese: [README-vn.md](README-vn.md)  
+> **Cursor / agent handoff:** [AGENTS.md](AGENTS.md) · [docs/HANDOFF.md](docs/HANDOFF.md) · `.cursor/rules/lab-context.mdc`
 
 **Sister project:** [jk-pb-rs485-monitor](../jk-pb-rs485-monitor) — JK-PB* BMS Modbus (separate bus / baud).
 

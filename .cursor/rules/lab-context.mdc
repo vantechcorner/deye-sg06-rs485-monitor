@@ -1,0 +1,50 @@
+---
+description: Lab context for Deye SG06 RS485 monitoring (always apply)
+alwaysApply: true
+---
+
+# Deye SG06 RS485 Monitor — lab context
+
+## Hardware (field-tested)
+
+- **Deye 6 kW SG06** hybrid inverter — Modbus RTU **slave**, datalogger port.
+- Battery pack **16S 51.2 V 100 Ah** with **JK-PB1A16S10P** linked to inverter over **CAN** (not Modbus).
+- Gateway: Cytron **IRIV IOC MQTT Gateway** → MQTT broker `iriv-pi-control`, base topic `iriv/ivt`.
+- Optional: ESPHome NodeMCU hostname `sg06-nodemcu`.
+
+## Bus rules
+
+- Baud **9600** 8N1, slave ID **1**, FC03/FC10.
+- **One master per bus.** Do not run IRIV and ESPHome on the same A/B.
+- Do not put a Modbus/CAN sniffer master on the Deye↔JK **CAN** cable for normal monitoring.
+
+## IRIV hard limit (critical)
+
+- **Maximum 26 enabled** `pollJobs`. Enabling a **27th** job caused device **reboot** and **all jobs wiped**.
+- Current template: **24** enabled jobs (no PV2 — site has single MPPT string set). Includes Load Current (179) and Inverter Frequency (193).
+- Regenerate only via `python _gen_iriv_jobs.py`. Keep `dataType: 3` (s16) for 16-bit Deye regs — `dataType: 1` produced bogus values ≈ scale.
+
+## Field-verified register corrections
+
+| Topic | Reg | Scale / note |
+|-------|-----|----------------|
+| Charge / Discharge today | **70 = charge**, **71 = discharge** | 0.1 kWh (PDF V118 was swapped vs SG06) |
+| PV / Grid current | 110, 112, 160 | **0.1** A (not 0.01) |
+| Load current | **179** | 0.01 A, s16 |
+| Load power | 178 | 1 W |
+| Inverter frequency | 193 | 0.01 Hz |
+| Batt temp / Inv temp | 182, 91 | scale 0.1, offset **-100** |
+| Poll periods | V/I/P | **1000 ms**; temp/SOC/Hz **10000**; `*_today` **30000** |
+
+## Key files
+
+- `iriv-ioc-config.json` / `_gen_iriv_jobs.py`
+- `deye-sg06-ivt-emu.py` + `rs485_emu/` (slave emulator for bench)
+- `deye-sg06-nodemcu.yaml` (ESPHome master)
+- `homeassistant/iriv_deye_mqtt.yaml`
+- `docs/HANDOFF.md` — full narrative handoff
+- `docs/esp32/README.md` — planned ESP32 UART→RS485 master (stub)
+
+## Sister project
+
+JK BMS Modbus monitor lives in `jk-pb-rs485-monitor` (115200 / slave 15 / UART1). Do not merge full Deye + JK IRIV job sets onto one gateway without trimming under 26 jobs and using separate RS485 buses.

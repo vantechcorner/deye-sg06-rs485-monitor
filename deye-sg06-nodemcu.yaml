@@ -1,0 +1,484 @@
+# ESPHome Modbus RTU master template for Deye SG05/SG06 hybrid inverters.
+# Bench target: deye-sg06-ivt-emu.py (USB-RS485 slave id 1, 9600 8N1).
+# Field: inverter datalogger/meter RS485 port — not the BMS CAN RJ45.
+# See README.md for IRIV jobs, poll timing, and JK BMS notes.
+# ESPHome `name` sets hostname / mDNS (e.g. sg06-nodemcu.local) and must match
+# the device name Home Assistant expects, or the node appears offline.
+esphome:
+  name: sg06-nodemcu
+  friendly_name: SG06 NodeMCU
+
+esp8266:
+  board: nodemcuv2
+
+# Disable UART logging so software serial can own the RS485 UART pins.
+logger:
+  baud_rate: 0
+
+# Home Assistant API
+api:
+  encryption:
+    key: "xNbP/cH9actbGU/mo0IvL42zxtPEa+6bwPCzV8QF7cQ="
+
+ota:
+  - platform: esphome
+    password: "64e522ab71282531f4eefdd085194bf0"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: SG06-NodeMCU-Fallback
+    password: alsvn123
+captive_portal:
+
+# ================= UART (Modbus RTU master) =================
+# NodeMCU: D5 = GPIO14 -> RS485 module RO/RX
+#           D6 = GPIO12 -> RS485 module DI/TX
+# Uses software serial on ESP8266; prefer ESP32 + HW UART for denser polling.
+uart:
+  id: uart_modbus
+  rx_pin: GPIO14
+  tx_pin: GPIO12
+  baud_rate: 9600
+  stop_bits: 1
+
+# ================= MODBUS =================
+# Deye holding registers are sparse => many separate FC03 ranges.
+# Keep update_interval > (ranges x command_throttle + bus time), otherwise
+# ESPHome logs "Frame already active" / "Poll refused by hub".
+# Bench target: deye-sg06-ivt-emu.py (slave id 1, 9600 8N1).
+modbus:
+  id: modbus1
+  uart_id: uart_modbus
+  send_wait_time: 50ms
+
+modbus_controller:
+  - id: deye
+    modbus_id: modbus1
+    address: 1
+    update_interval: 15s
+    command_throttle: 100ms
+    allow_duplicate_commands: false
+
+# ================= TEXT SENSORS =================    
+text_sensor:
+  - platform: template
+    name: "Inverter Operating Status Text"
+    lambda: |-
+      int v = (int) id(deye_operating_status).state;
+      switch(v) {
+        case 0: return {"🔵 Standby"};
+        case 1: return {"🟠 Self-Test"};
+        case 2: return {"🟢 Normal"};
+        case 3: return {"⚠️ Alarm"};
+        case 4: return {"🔴 Fault"};
+        default: return {"Unknown"};
+      }
+    update_interval: 15s
+
+# ================= SENSORS =================
+sensor:
+
+#########################
+# INVERTER STATUS & TEMP
+#########################
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: deye_operating_status
+    name: "Inverter Operating Status"
+    address: 59
+    register_type: holding
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Inverter DC Temperature"
+    device_class: temperature
+    state_class: measurement    
+    unit_of_measurement: "°C"
+    address: 90
+    value_type: S_WORD
+    register_type: holding
+    filters:
+      - lambda: return (x - 1000) / 10.0;
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Inverter Temperature"
+    device_class: temperature
+    state_class: measurement    
+    unit_of_measurement: "°C"
+    address: 91
+    value_type: S_WORD
+    register_type: holding
+    filters:
+      - multiply: 0.1
+      - offset: -100
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Inverter AC Frequency"
+    device_class: frequency
+    unit_of_measurement: "Hz"
+    address: 193
+    value_type: U_WORD
+    register_type: holding
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye    
+    name: "Inverter AC Voltage"
+    device_class: voltage
+    unit_of_measurement: "V"
+    address: 154
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Inverter AC Current"
+    device_class: current
+    unit_of_measurement: "A"
+    address: 164
+    register_type: holding
+    value_type: S_WORD
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye    
+    name: "Inverter Active Power"
+    id: ivt_p
+    device_class: power
+    unit_of_measurement: "W"
+    state_class: measurement
+    address: 175
+    register_type: holding
+    value_type: S_WORD
+
+#########################
+# GRID
+#########################
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Frequency"
+    device_class: frequency
+    unit_of_measurement: "Hz"
+    address: 79
+    value_type: U_WORD
+    register_type: holding
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Voltage"
+    device_class: voltage
+    unit_of_measurement: "V"
+    address: 150
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Current"
+    device_class: current
+    unit_of_measurement: "A"
+    address: 160
+    register_type: holding
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Power CT"
+    id: grid_ct_p
+    device_class: power
+    state_class: measurement
+    unit_of_measurement: "W"
+    address: 172
+    register_type: holding
+    value_type: S_WORD  
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Energy Purchase Today"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 76
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1      
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Grid Energy Sell Today"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 77
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+    accuracy_decimals: 1  
+
+#########################
+# BATTERY
+#########################
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Voltage"
+    device_class: voltage
+    unit_of_measurement: "V"
+    address: 183
+    value_type: U_WORD
+    register_type: holding
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Current"
+    device_class: current
+    unit_of_measurement: "A"
+    address: 191
+    value_type: S_WORD
+    register_type: holding
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery SOC"
+    device_class: battery
+    unit_of_measurement: "%"
+    address: 184
+    value_type: U_WORD
+    register_type: holding
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Power"
+    device_class: power
+    unit_of_measurement: "W"
+    state_class: measurement
+    address: 190
+    register_type: holding
+    value_type: S_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Temperature"
+    device_class: temperature
+    unit_of_measurement: "°C"
+    address: 182
+    register_type: holding
+    value_type: S_WORD
+    filters:
+      - multiply: 0.1
+      - offset: -100
+    accuracy_decimals: 1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Discharge Today"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 71
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Battery Charge Today"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 70
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+#########################
+# LOAD
+#########################
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Load Power"
+    id: load_p
+    register_type: holding
+    address: 178
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+    device_class: power
+    state_class: measurement
+    value_type: S_WORD 
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Load Current"
+    device_class: current
+    unit_of_measurement: "A"
+    state_class: measurement
+    address: 179
+    register_type: holding
+    value_type: S_WORD
+    filters:
+      - multiply: 0.01
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "Day Load Energy" 
+    device_class: energy
+    state_class: total_increasing    
+    unit_of_measurement: "kWh"
+    address: 84
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1    
+    filters:
+      - multiply: 0.1  
+
+#########################
+# PV1 & PV2
+#########################
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv1_v
+    name: "PV1 Voltage"
+    device_class: voltage
+    unit_of_measurement: "V"
+    address: 109
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv1_i
+    name: "PV1 Current"
+    device_class: current
+    unit_of_measurement: "A"
+    address: 110
+    register_type: holding
+    value_type: S_WORD
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv1_p
+    name: "PV1 Power"
+    device_class: power
+    unit_of_measurement: "W"
+    state_class: measurement
+    address: 186
+    register_type: holding
+    value_type: S_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv2_v
+    name: "PV2 Voltage"
+    device_class: voltage
+    unit_of_measurement: "V"
+    address: 111
+    register_type: holding
+    value_type: U_WORD
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv2_i
+    name: "PV2 Current"
+    device_class: current
+    unit_of_measurement: "A"
+    address: 112
+    register_type: holding
+    value_type: S_WORD
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    id: pv2_p
+    name: "PV2 Power"
+    device_class: power
+    unit_of_measurement: "W"
+    state_class: measurement
+    address: 187
+    register_type: holding
+    value_type: S_WORD
+
+  - platform: template
+    name: "PV Total Power"
+    device_class: power
+    unit_of_measurement: "W"
+    state_class: measurement
+    lambda: |-
+      return id(pv1_p).state + id(pv2_p).state;
+    update_interval: 15s
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "PV Energy Total Today"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 108
+    register_type: holding
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: deye
+    name: "PV Energy Total Generation"
+    device_class: energy
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    address: 96
+    register_type: holding
+    value_type: U_DWORD_R
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1

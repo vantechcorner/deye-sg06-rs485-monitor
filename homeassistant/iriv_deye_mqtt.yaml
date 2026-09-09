@@ -1,0 +1,314 @@
+# Home Assistant MQTT sensors for Deye SG05/SG06 via IRIV IOC MQTT Gateway.
+#
+# Matches iriv-ioc-config.json poll jobs:
+#   MQTT baseTopic = iriv/ivt
+#   Full topic     = iriv/ivt/{topicSuffix}
+#   Payload        = JSON {"value": ...}  →  value_json.value
+#
+# Install:
+#   A) Copy to config/packages/iriv_deye_mqtt.yaml with:
+#        homeassistant:
+#          packages: !include_dir_named packages
+#   B) Or merge mqtt: / template: into configuration.yaml
+
+mqtt:
+  sensor:
+    - name: "Deye Operating Status"
+      unique_id: iriv_deye_operating_status
+      state_topic: "iriv/ivt/status"
+      value_template: "{{ value_json.value }}"
+      entity_category: diagnostic
+      device: &deye_iriv_device
+        identifiers: ["iriv_ivt_deye_sg06"]
+        name: "Deye SG06 (IRIV)"
+        manufacturer: "Deye"
+        model: "SG06 / SG05 hybrid (via IRIV IOC)"
+        suggested_area: "Energy"
+
+    # ----- Battery -----
+    - name: "Deye Battery Voltage"
+      unique_id: iriv_deye_battery_voltage
+      state_topic: "iriv/ivt/battery/voltage"
+      device_class: voltage
+      state_class: measurement
+      unit_of_measurement: "V"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Battery SOC"
+      unique_id: iriv_deye_battery_soc
+      state_topic: "iriv/ivt/battery/soc"
+      device_class: battery
+      state_class: measurement
+      unit_of_measurement: "%"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye Battery Power"
+      unique_id: iriv_deye_battery_power
+      state_topic: "iriv/ivt/battery/power"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye Battery Current"
+      unique_id: iriv_deye_battery_current
+      state_topic: "iriv/ivt/battery/current"
+      device_class: current
+      state_class: measurement
+      unit_of_measurement: "A"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Battery Temperature"
+      unique_id: iriv_deye_battery_temperature
+      state_topic: "iriv/ivt/battery/temperature"
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye Battery Charge Today"
+      unique_id: iriv_deye_battery_charge_today
+      state_topic: "iriv/ivt/battery/charge_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye Battery Discharge Today"
+      unique_id: iriv_deye_battery_discharge_today
+      state_topic: "iriv/ivt/battery/discharge_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    # ----- PV1 / PV2 -----
+    - name: "Deye PV1 Voltage"
+      unique_id: iriv_deye_pv1_voltage
+      state_topic: "iriv/ivt/pv1/voltage"
+      device_class: voltage
+      state_class: measurement
+      unit_of_measurement: "V"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye PV1 Current"
+      unique_id: iriv_deye_pv1_current
+      state_topic: "iriv/ivt/pv1/current"
+      device_class: current
+      state_class: measurement
+      unit_of_measurement: "A"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye PV1 Power"
+      unique_id: iriv_deye_pv1_power
+      state_topic: "iriv/ivt/pv1/power"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye PV2 Voltage"
+      unique_id: iriv_deye_pv2_voltage
+      state_topic: "iriv/ivt/pv2/voltage"
+      device_class: voltage
+      state_class: measurement
+      unit_of_measurement: "V"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye PV2 Current"
+      unique_id: iriv_deye_pv2_current
+      state_topic: "iriv/ivt/pv2/current"
+      device_class: current
+      state_class: measurement
+      unit_of_measurement: "A"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye PV2 Power"
+      unique_id: iriv_deye_pv2_power
+      state_topic: "iriv/ivt/pv2/power"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye PV Energy Today"
+      unique_id: iriv_deye_pv_energy_today
+      state_topic: "iriv/ivt/pv/energy_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    # ----- Grid -----
+    - name: "Deye Grid Voltage"
+      unique_id: iriv_deye_grid_voltage
+      state_topic: "iriv/ivt/grid/voltage"
+      device_class: voltage
+      state_class: measurement
+      unit_of_measurement: "V"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye Grid Frequency"
+      unique_id: iriv_deye_grid_frequency
+      state_topic: "iriv/ivt/grid/frequency"
+      device_class: frequency
+      state_class: measurement
+      unit_of_measurement: "Hz"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Grid Current"
+      unique_id: iriv_deye_grid_current
+      state_topic: "iriv/ivt/grid/current"
+      device_class: current
+      state_class: measurement
+      unit_of_measurement: "A"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Grid Power CT"
+      unique_id: iriv_deye_grid_power_ct
+      state_topic: "iriv/ivt/grid/power_ct"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye Grid Buy Today"
+      unique_id: iriv_deye_grid_buy_today
+      state_topic: "iriv/ivt/grid/buy_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye Grid Sell Today"
+      unique_id: iriv_deye_grid_sell_today
+      state_topic: "iriv/ivt/grid/sell_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    # ----- Inverter / Load -----
+    - name: "Deye Inverter Temperature"
+      unique_id: iriv_deye_inverter_temperature
+      state_topic: "iriv/ivt/inverter/temperature"
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+    - name: "Deye Inverter Active Power"
+      unique_id: iriv_deye_inverter_active_power
+      state_topic: "iriv/ivt/inverter/power"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye Inverter Frequency"
+      unique_id: iriv_deye_inverter_frequency
+      state_topic: "iriv/ivt/inverter/frequency"
+      device_class: frequency
+      state_class: measurement
+      unit_of_measurement: "Hz"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Load Power"
+      unique_id: iriv_deye_load_power
+      state_topic: "iriv/ivt/load/power"
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: "W"
+      value_template: "{{ value_json.value }}"
+      device: *deye_iriv_device
+
+    - name: "Deye Load Current"
+      unique_id: iriv_deye_load_current
+      state_topic: "iriv/ivt/load/current"
+      device_class: current
+      state_class: measurement
+      unit_of_measurement: "A"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 2
+      device: *deye_iriv_device
+
+    - name: "Deye Load Energy Today"
+      unique_id: iriv_deye_load_energy_today
+      state_topic: "iriv/ivt/load/energy_today"
+      device_class: energy
+      state_class: total_increasing
+      unit_of_measurement: "kWh"
+      value_template: "{{ value_json.value }}"
+      suggested_display_precision: 1
+      device: *deye_iriv_device
+
+template:
+  - sensor:
+      - name: "Deye Operating Status Text"
+        unique_id: iriv_deye_operating_status_text
+        state: >
+          {% set v = states('sensor.deye_operating_status') | int(-1) %}
+          {% set map = {
+            0: 'Standby',
+            1: 'Self-Test',
+            2: 'Normal',
+            3: 'Alarm',
+            4: 'Fault'
+          } %}
+          {{ map.get(v, 'Unknown') }}
+        icon: >
+          {% set v = states('sensor.deye_operating_status') | int(-1) %}
+          {% if v == 2 %}mdi:solar-power
+          {% elif v == 3 %}mdi:alert
+          {% elif v == 4 %}mdi:alert-octagon
+          {% else %}mdi:help-circle{% endif %}
+
+      - name: "Deye PV Total Power"
+        unique_id: iriv_deye_pv_total_power
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set a = states('sensor.deye_pv1_power') | float(0) %}
+          {% set b = states('sensor.deye_pv2_power') | float(0) %}
+          {{ (a + b) | round(0) }}

@@ -8,7 +8,7 @@ Periods:
   TEMP_MS 10000  — temps, status, SOC, frequency
   ENERGY_MS 30000 — *_today energy counters
 
-Run: python _gen_iriv_jobs.py
+Run: python iriv/_gen_iriv_jobs.py
 """
 
 from __future__ import annotations

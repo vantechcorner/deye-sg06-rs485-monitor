@@ -89,8 +89,9 @@ Use for search, Cursor rules, and agent context. English preferred in code/comme
 
 ## Related filenames
 
+- iriv/iriv-ioc-config.json
 - iriv_deye_mqtt.yaml
-- iriv-ioc-config.json
 - Inverter-BMS-RS485-Emulator
-- deye-sg06-ivt-emu.py
+- emulator/deye-sg06-ivt-emu.py
+- esphome/deye-sg06-nodemcu.yaml
 - sg06-nodemcu

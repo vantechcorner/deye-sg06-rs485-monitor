@@ -6,11 +6,11 @@ day-cycle simulation. Intended masters: ESPHome, IRIV IOC MQTT Gateway, or any
 Modbus RTU logger.
 
 Register map follows Deye SG05 Modbus Protocol V118 (holding registers) and
-matches deye-sg06-nodemcu.yaml.
+matches esphome/deye-sg06-nodemcu.yaml.
 
 Examples:
-  python deye-sg06-ivt-emu.py --port COM35 --debug --scenario day
-  python deye-sg06-ivt-emu.py --port COM35 --trace --scenario fault
+  python emulator/deye-sg06-ivt-emu.py --port COM35 --debug --scenario day
+  python emulator/deye-sg06-ivt-emu.py --port COM35 --trace --scenario fault
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-# Allow running from repo root without install.
+# Allow running from repo root or emulator/ without install.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from rs485_emu.core.cli import add_common_args, setup_logging

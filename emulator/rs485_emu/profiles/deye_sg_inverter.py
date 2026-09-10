@@ -1,6 +1,6 @@
 """Deye SG05/SG06 hybrid inverter Modbus holding-register profile.
 
-Map aligned with Deye SG05 Modbus Protocol V118 and deye-sg06-nodemcu.yaml.
+Map aligned with Deye SG05 Modbus Protocol V118 and esphome/deye-sg06-nodemcu.yaml.
 Emulates the inverter **datalogger RS485** slave (not the BMS CAN port).
 """
 
@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 from rs485_emu.core.registers import RegisterBank, RegisterMeta
 
-# Addresses used by deye-sg06-nodemcu.yaml + PDF V118 essentials / pack1.
+# Addresses used by esphome/deye-sg06-nodemcu.yaml + PDF V118 essentials / pack1.
 REGISTER_META: dict[int, RegisterMeta] = {
     0: RegisterMeta(0, "DeviceType", unit=""),
     59: RegisterMeta(59, "OperatingStatus"),

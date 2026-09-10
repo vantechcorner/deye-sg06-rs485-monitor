@@ -1,6 +1,6 @@
 # Home Assistant MQTT sensors for Deye SG05/SG06 via IRIV IOC MQTT Gateway.
 #
-# Matches iriv-ioc-config.json poll jobs:
+# Matches iriv/iriv-ioc-config.json poll jobs:
 #   MQTT baseTopic = iriv/ivt
 #   Full topic     = iriv/ivt/{topicSuffix}
 #   Payload        = JSON {"value": ...}  →  value_json.value

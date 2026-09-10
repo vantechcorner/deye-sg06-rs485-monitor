@@ -1,5 +1,5 @@
 # ESPHome Modbus RTU master template for Deye SG05/SG06 hybrid inverters.
-# Bench target: deye-sg06-ivt-emu.py (USB-RS485 slave id 1, 9600 8N1).
+# Bench target: emulator/deye-sg06-ivt-emu.py (USB-RS485 slave id 1, 9600 8N1).
 # Field: inverter datalogger/meter RS485 port — not the BMS CAN RJ45.
 # See README.md for IRIV jobs, poll timing, and JK BMS notes.
 # ESPHome `name` sets hostname / mDNS (e.g. sg06-nodemcu.local) and must match
@@ -48,7 +48,7 @@ uart:
 # Deye holding registers are sparse => many separate FC03 ranges.
 # Keep update_interval > (ranges x command_throttle + bus time), otherwise
 # ESPHome logs "Frame already active" / "Poll refused by hub".
-# Bench target: deye-sg06-ivt-emu.py (slave id 1, 9600 8N1).
+# Bench target: emulator/deye-sg06-ivt-emu.py (slave id 1, 9600 8N1).
 modbus:
   id: modbus1
   uart_id: uart_modbus

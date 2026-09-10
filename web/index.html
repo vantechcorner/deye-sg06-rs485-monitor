@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#010409">
+  <title>Deye MQTT Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-view="simple">
+  <header class="status-bar">
+    <span id="sb-mqtt" class="sb-item muted">📡 MQTT --</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-status" class="sb-item muted">❔ —</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-grid" class="sb-item muted">⚡ --</span>
+    <div class="sb-right">
+      <span id="sb-clock" class="sb-item">--/--/---- --:--:--</span>
+      <div class="view-toggle" role="group" aria-label="Layout">
+        <button type="button" class="view-btn active" data-view="simple">Simplify</button>
+        <button type="button" class="view-btn" data-view="full">Full</button>
+        <button type="button" class="view-btn" data-view="minimal">Minimal</button>
+      </div>
+      <button type="button" id="btn-settings" class="sb-gear" title="Broker settings" aria-label="Broker settings">⚙</button>
+    </div>
+  </header>
+
+  <div class="view-simple">
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="home">Home</button>
+      <button type="button" class="tab" data-tab="batt">Batt</button>
+      <button type="button" class="tab" data-tab="pv">PV</button>
+      <button type="button" class="tab" data-tab="grid">Grid</button>
+      <button type="button" class="tab" data-tab="load">Load</button>
+    </nav>
+
+    <main>
+      <section id="tab-home" class="panel active">
+        <div class="home-grid">
+          <article class="card soc-card">
+            <h2>Battery SOC</h2>
+            <div class="soc-wrap">
+              <svg class="soc-svg" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="soc-track" cx="60" cy="60" r="50"></circle>
+                <circle id="soc-ind" class="soc-ind" cx="60" cy="60" r="50"></circle>
+              </svg>
+              <div id="home-soc" class="soc-val">—</div>
+            </div>
+            <div id="batt-segs" class="pwr-segs" aria-hidden="true"></div>
+            <div id="home-batt-p" class="hero muted">—</div>
+          </article>
+          <div class="home-col">
+            <article class="card hero-card">
+              <h2>PV total</h2>
+              <div id="home-pv" class="hero pv">—</div>
+            </article>
+            <article class="card hero-card">
+              <h2>Grid</h2>
+              <div id="home-grid" class="hero">—</div>
+            </article>
+            <article class="card hero-card">
+              <h2>Load</h2>
+              <div id="home-load" class="hero accent">—</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-batt" class="panel">
+        <div class="metric-grid">
+          <article class="card"><h2>Voltage</h2><div data-m="battery/voltage" class="metric">—</div></article>
+          <article class="card"><h2>Current</h2><div data-m="battery/current" data-signed class="metric">—</div></article>
+          <article class="card"><h2>Power</h2><div data-m="battery/power" data-signed class="metric">—</div></article>
+          <article class="card">
+            <h2>SOC</h2>
+            <div data-m="battery/soc" class="metric">—</div>
+            <div class="soc-bar"><span id="batt-soc-bar"></span></div>
+          </article>
+          <article class="card"><h2>Temp</h2><div data-m="battery/temperature" class="metric">—</div></article>
+          <article class="card">
+            <h2>Charge / Disch.</h2>
+            <div data-m="battery/charge_today" class="metric metric-sm">—</div>
+            <div data-m="battery/discharge_today" class="metric metric-sm">—</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="tab-pv" class="panel">
+        <div class="pv-row">
+          <article class="card">
+            <h2>PV1 V / A / W</h2>
+            <div data-m="pv1/voltage" class="metric metric-sm">—</div>
+            <div data-m="pv1/current" class="metric metric-sm">—</div>
+            <div data-m="pv1/power" data-signed class="metric metric-sm">—</div>
+          </article>
+          <article class="card">
+            <h2>PV2 V / A / W</h2>
+            <div data-m="pv2/voltage" class="metric metric-sm">—</div>
+            <div data-m="pv2/current" class="metric metric-sm">—</div>
+            <div data-m="pv2/power" data-signed class="metric metric-sm">—</div>
+          </article>
+        </div>
+        <article class="card row-card">
+          <h2>PV energy today</h2>
+          <div data-m="pv/energy_today" class="metric">—</div>
+        </article>
+      </section>
+
+      <section id="tab-grid" class="panel">
+        <div class="metric-grid">
+          <article class="card"><h2>Voltage</h2><div data-m="grid/voltage" class="metric">—</div></article>
+          <article class="card"><h2>Frequency</h2><div data-m="grid/frequency" class="metric">—</div></article>
+          <article class="card"><h2>Current</h2><div data-m="grid/current" class="metric">—</div></article>
+          <article class="card"><h2>CT power</h2><div data-m="grid/power_ct" data-signed class="metric">—</div></article>
+          <article class="card"><h2>Buy today</h2><div data-m="grid/buy_today" class="metric">—</div></article>
+          <article class="card"><h2>Sell today</h2><div data-m="grid/sell_today" class="metric">—</div></article>
+        </div>
+      </section>
+
+      <section id="tab-load" class="panel">
+        <div class="metric-grid">
+          <article class="card"><h2>Inv temp</h2><div data-m="inverter/temperature" class="metric">—</div></article>
+          <article class="card"><h2>Voltage</h2><div id="simple-ac-v" class="metric">—</div></article>
+          <article class="card"><h2>Inv power</h2><div data-m="inverter/power" data-signed class="metric">—</div></article>
+          <article class="card"><h2>Inv Hz</h2><div data-m="inverter/frequency" class="metric">—</div></article>
+          <article class="card"><h2>Load power</h2><div data-m="load/power" data-signed class="metric">—</div></article>
+          <article class="card"><h2>Load current</h2><div id="simple-load-i" class="metric">—</div></article>
+          <article class="card"><h2>Load today</h2><div data-m="load/energy_today" class="metric">—</div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="view-full">
+    <main class="full-main">
+      <section class="kpi-row">
+        <article class="kpi">
+          <h2>PV total</h2>
+          <div id="full-kpi-pv" class="kpi-val pv">—</div>
+          <svg class="spark" id="spark-pv" viewBox="0 0 120 28" preserveAspectRatio="none"></svg>
+        </article>
+        <article class="kpi">
+          <h2>Load</h2>
+          <div id="full-kpi-load" class="kpi-val accent">—</div>
+          <svg class="spark" id="spark-load" viewBox="0 0 120 28" preserveAspectRatio="none"></svg>
+        </article>
+        <article class="kpi">
+          <h2>Grid CT</h2>
+          <div id="full-kpi-grid" class="kpi-val">—</div>
+          <p id="full-kpi-grid-dir" class="kpi-sub muted">—</p>
+          <svg class="spark" id="spark-grid" viewBox="0 0 120 28" preserveAspectRatio="none"></svg>
+        </article>
+        <article class="kpi">
+          <h2>Battery</h2>
+          <div id="full-kpi-batt" class="kpi-val">—</div>
+          <p id="full-kpi-batt-dir" class="kpi-sub muted">—</p>
+          <svg class="spark" id="spark-batt" viewBox="0 0 120 28" preserveAspectRatio="none"></svg>
+        </article>
+        <article class="kpi kpi-soc">
+          <h2>SOC</h2>
+          <div class="soc-wrap soc-wrap-sm">
+            <svg class="soc-svg" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="soc-track" cx="60" cy="60" r="50"></circle>
+              <circle id="soc-ind-full" class="soc-ind" cx="60" cy="60" r="50"></circle>
+            </svg>
+            <div id="full-soc" class="soc-val">—</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="full-mid">
+        <article class="card flow-card">
+          <div class="flow-head">
+            <h2>Flow Graph</h2>
+            <span id="flow-inv-head" class="flow-head-meta">Inverter</span>
+          </div>
+          <div class="deye-flow">
+            <svg class="deye-wires" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet">
+              <path id="wire-pv" class="wire" d="M 355 210 H 250 Q 220 210 220 180 V 110 Q 220 90 200 90 H 130"/>
+              <path id="wire-grid" class="wire" d="M 445 210 H 550 Q 580 210 580 180 V 110 Q 580 90 600 90 H 670"/>
+              <path id="wire-batt" class="wire" d="M 355 250 H 250 Q 220 250 220 280 V 360 Q 220 390 200 390 H 130"/>
+              <path id="wire-load" class="wire" d="M 445 250 H 550 Q 580 250 580 280 V 360 Q 580 390 600 390 H 670"/>
+              <g id="grid-ok" class="grid-ok hidden">
+                <circle cx="580" cy="150" r="10" fill="#3fb950"/>
+                <path d="M574 150 l4 4 8-9" fill="none" stroke="#0d1117" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </svg>
+
+            <div class="deye-node node-pv">
+              <svg class="deye-ico" viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="44" cy="16" r="8" fill="#e3b341"/>
+                <rect x="8" y="28" width="40" height="26" rx="3" fill="none" stroke="#58a6ff" stroke-width="2.5"/>
+                <path d="M8 37h40M8 45h40M21 28v26M35 28v26" stroke="#58a6ff" stroke-width="1.6"/>
+              </svg>
+              <strong id="flow-pv">—</strong>
+              <span id="flow-pv-share" class="flow-note" hidden>PV1</span>
+            </div>
+            <div class="deye-node node-grid">
+              <svg class="deye-ico" viewBox="0 0 64 64" aria-hidden="true">
+                <path d="M32 8 L52 20 V36 L32 48 L12 36 V20 Z" fill="none" stroke="#8b949e" stroke-width="2.4"/>
+                <path d="M32 8 V56 M12 36 H52 M22 28 H42" stroke="#8b949e" stroke-width="2.2"/>
+              </svg>
+              <strong id="flow-grid">—</strong>
+              <span id="flow-grid-meta" class="flow-note">—</span>
+            </div>
+            <div class="deye-node node-inv">
+              <svg class="deye-ico deye-ico-lg" viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="10" y="14" width="44" height="36" rx="6" fill="none" stroke="#58a6ff" stroke-width="2.6"/>
+                <rect x="18" y="22" width="12" height="8" rx="1" fill="#58a6ff"/>
+                <path d="M36 24h12M36 30h12M20 38h24M20 44h16" stroke="#8b949e" stroke-width="2"/>
+              </svg>
+              <span class="flow-label">Inverter</span>
+              <span id="flow-inv-meta" class="flow-note">—</span>
+            </div>
+            <div class="deye-node node-batt">
+              <span id="flow-batt-soc" class="batt-soc-label">—</span>
+              <svg class="deye-ico" viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="8" y="22" width="42" height="22" rx="4" fill="none" stroke="#58a6ff" stroke-width="2.5"/>
+                <rect x="50" y="28" width="6" height="10" rx="1" fill="#58a6ff"/>
+                <rect id="batt-fill" x="12" y="26" width="0" height="14" rx="2" fill="#58a6ff"/>
+              </svg>
+              <strong id="flow-batt">—</strong>
+              <span id="flow-batt-meta" class="flow-note">—</span>
+            </div>
+            <div class="deye-node node-load">
+              <svg class="deye-ico" viewBox="0 0 64 64" aria-hidden="true">
+                <path d="M10 30 L32 12 L54 30 V52 H10 Z" fill="none" stroke="#58a6ff" stroke-width="2.5"/>
+                <path d="M26 52 V38 H38 V52" stroke="#58a6ff" stroke-width="2.3"/>
+                <circle cx="32" cy="28" r="4" fill="#e3b341"/>
+              </svg>
+              <strong id="flow-load">—</strong>
+              <span id="flow-load-meta" class="flow-note">Home</span>
+            </div>
+          </div>
+          <div class="derived">
+            <div><span>Solar vs load</span><strong id="full-cover">—</strong></div>
+            <div><span>Self-use (est.)</span><strong id="full-self">—</strong></div>
+            <div><span>Grid mode</span><strong id="full-grid-mode">—</strong></div>
+            <div><span>Inverter</span><strong id="full-status">—</strong></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Energy today</h2>
+          <div class="today-grid">
+            <div class="today-item"><span>PV</span><strong data-m="pv/energy_today">—</strong></div>
+            <div class="today-item"><span>Load</span><strong data-m="load/energy_today">—</strong></div>
+            <div class="today-item pos-text"><span>Charge</span><strong data-m="battery/charge_today">—</strong></div>
+            <div class="today-item danger-text"><span>Discharge</span><strong data-m="battery/discharge_today">—</strong></div>
+            <div class="today-item"><span>Buy</span><strong data-m="grid/buy_today">—</strong></div>
+            <div class="today-item"><span>Sell</span><strong data-m="grid/sell_today">—</strong></div>
+          </div>
+          <div class="share-block">
+            <p>PV string split</p>
+            <div class="share-bar"><span id="pv1-share"></span></div>
+            <div class="share-legend">
+              <span>PV1 <strong id="full-pv1w">—</strong></span>
+              <span>PV2 <strong id="full-pv2w">—</strong></span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="table-grid">
+        <article class="card">
+          <h2>Photovoltaic</h2>
+          <table class="data-table">
+            <thead><tr><th>Point</th><th>V</th><th>A</th><th>W</th><th>Age</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>PV1</td>
+                <td data-m="pv1/voltage">—</td>
+                <td data-m="pv1/current">—</td>
+                <td data-m="pv1/power" data-signed>—</td>
+                <td data-age="pv1/power">—</td>
+              </tr>
+              <tr>
+                <td>PV2</td>
+                <td data-m="pv2/voltage">—</td>
+                <td data-m="pv2/current">—</td>
+                <td data-m="pv2/power" data-signed>—</td>
+                <td data-age="pv2/power">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h2>Battery</h2>
+          <div id="full-batt-segs" class="pwr-segs" aria-hidden="true"></div>
+          <table class="data-table">
+            <tbody>
+              <tr><td>Voltage</td><td data-m="battery/voltage">—</td><td data-age="battery/voltage">—</td></tr>
+              <tr><td>Current</td><td data-m="battery/current" data-signed>—</td><td data-age="battery/current">—</td></tr>
+              <tr><td>Power</td><td data-m="battery/power" data-signed>—</td><td data-age="battery/power">—</td></tr>
+              <tr><td>SOC</td><td data-m="battery/soc">—</td><td data-age="battery/soc">—</td></tr>
+              <tr><td>Temp</td><td data-m="battery/temperature">—</td><td data-age="battery/temperature">—</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h2>Grid</h2>
+          <table class="data-table">
+            <tbody>
+              <tr><td>Voltage</td><td data-m="grid/voltage">—</td><td data-age="grid/voltage">—</td></tr>
+              <tr><td>Frequency</td><td data-m="grid/frequency">—</td><td data-age="grid/frequency">—</td></tr>
+              <tr><td>Current</td><td data-m="grid/current">—</td><td data-age="grid/current">—</td></tr>
+              <tr><td>CT power</td><td data-m="grid/power_ct" data-signed>—</td><td data-age="grid/power_ct">—</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h2>Inverter / Load</h2>
+          <table class="data-table">
+            <tbody>
+              <tr><td>Voltage</td><td id="full-ac-v">—</td><td id="full-ac-v-age">—</td></tr>
+              <tr><td>Temp</td><td data-m="inverter/temperature">—</td><td data-age="inverter/temperature">—</td></tr>
+              <tr><td>Inverter power</td><td data-m="inverter/power" data-signed>—</td><td data-age="inverter/power">—</td></tr>
+              <tr><td>Frequency</td><td data-m="inverter/frequency">—</td><td data-age="inverter/frequency">—</td></tr>
+              <tr><td>Load power</td><td data-m="load/power" data-signed>—</td><td data-age="load/power">—</td></tr>
+              <tr><td>Load current</td><td id="full-load-i">—</td><td id="full-load-i-age">—</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="view-minimal">
+    <main class="scada-main">
+      <div class="scada-strip">
+        <div class="scada-box">
+          <span class="scada-k">SITE</span>
+          <strong class="scada-v">DEYE-SG</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">PV MW</span>
+          <strong id="scada-pv" class="scada-v cyan">—</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">LOAD MW</span>
+          <strong id="scada-load" class="scada-v">—</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">GRID MW</span>
+          <strong id="scada-grid" class="scada-v">—</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">BATT %</span>
+          <strong id="scada-soc" class="scada-v lime">—</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">MODE</span>
+          <strong id="scada-mode" class="scada-v">—</strong>
+        </div>
+        <div class="scada-box">
+          <span class="scada-k">INV</span>
+          <strong id="scada-inv-st" class="scada-v">—</strong>
+        </div>
+      </div>
+
+      <svg class="scada-map" viewBox="0 0 960 520" preserveAspectRatio="xMidYMid meet" aria-label="Single-line diagram">
+        <!-- Feeders -->
+        <g fill="none" stroke-width="2">
+          <path id="scada-wire-pv" class="wire-cyan" d="M 180 78 V 250 H 392"/>
+          <path id="scada-wire-batt" class="wire-cyan" d="M 180 442 V 250 H 392"/>
+          <path class="wire-cyan" d="M 408 250 H 548"/>
+          <rect class="scada-busbar" x="548" y="242" width="72" height="16"/>
+          <path id="scada-wire-load" class="wire-red" d="M 620 250 H 700 V 130 H 820"/>
+          <path id="scada-wire-grid" class="wire-red" d="M 620 250 H 700 V 390 H 820"/>
+          <path class="wire-dim" d="M 660 170 V 230"/>
+          <path class="wire-dim" d="M 660 270 V 330"/>
+        </g>
+
+        <!-- Disconnect gaps on feeders -->
+        <g class="scada-disc" transform="translate(300,246)">
+          <line x1="0" y1="4" x2="6" y2="4"/><line x1="14" y1="4" x2="20" y2="4"/>
+          <rect x="7" y="1" width="6" height="6"/>
+        </g>
+        <g class="scada-disc red" transform="translate(650,246)">
+          <line x1="0" y1="4" x2="6" y2="4"/><line x1="14" y1="4" x2="20" y2="4"/>
+          <rect x="7" y="1" width="6" height="6"/>
+        </g>
+
+        <!-- PV bay: solid square on line -->
+        <g id="scada-node-pv" class="scada-bay" transform="translate(172,70)">
+          <rect class="bay-fill" x="1" y="1" width="14" height="14"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="198" y="66" class="scada-label">PV1</text>
+        <text id="scada-tag-pv" x="198" y="100" class="scada-tag cyan">—</text>
+
+        <!-- BATT bay -->
+        <g id="scada-node-batt" class="scada-bay" transform="translate(172,434)">
+          <rect class="bay-fill" x="1" y="1" width="14" height="14"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="198" y="450" class="scada-label">BATT</text>
+        <text id="scada-tag-soc" x="198" y="468" class="scada-tag lime">—</text>
+        <text id="scada-tag-batt" x="198" y="486" class="scada-tag">—</text>
+
+        <!-- INV: diagonally split cyan/red (classic mimic) -->
+        <g id="scada-node-inv" class="scada-bay scada-bay-split" transform="translate(392,242)">
+          <polygon class="bay-cyan" points="0,0 16,0 0,16"/>
+          <polygon class="bay-red" points="16,0 16,16 0,16"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="400" y="232" text-anchor="middle" class="scada-label">INV</text>
+        <text id="scada-tag-inv" x="400" y="278" text-anchor="middle" class="scada-tag">—</text>
+
+        <!-- BUS junction: split bay -->
+        <g id="scada-node-bus" class="scada-bay scada-bay-split hot" transform="translate(612,242)">
+          <polygon class="bay-cyan" points="0,0 16,0 0,16"/>
+          <polygon class="bay-red" points="16,0 16,16 0,16"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="620" y="232" text-anchor="middle" class="scada-label">BUS</text>
+
+        <!-- LOAD bay -->
+        <g id="scada-node-load" class="scada-bay" transform="translate(812,122)">
+          <rect class="bay-fill" x="1" y="1" width="14" height="14"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="836" y="118" class="scada-label">LOAD</text>
+        <text id="scada-tag-load" x="836" y="148" class="scada-tag red">—</text>
+
+        <!-- GRID bay -->
+        <g id="scada-node-grid" class="scada-bay" transform="translate(812,382)">
+          <rect class="bay-fill" x="1" y="1" width="14" height="14"/>
+          <rect class="bay-frame" x="0.5" y="0.5" width="15" height="15"/>
+        </g>
+        <text x="836" y="378" class="scada-label">GRID</text>
+        <text id="scada-tag-grid" x="836" y="408" class="scada-tag">—</text>
+        <text id="scada-tag-grid-dir" x="836" y="424" class="scada-tag dim">—</text>
+
+        <text x="250" y="242" class="scada-id">1</text>
+        <text x="250" y="268" class="scada-id">2</text>
+        <text x="670" y="242" class="scada-id">3</text>
+        <text x="710" y="180" class="scada-id">4</text>
+        <text x="710" y="340" class="scada-id">5</text>
+      </svg>
+
+      <div class="scada-board">
+        <table class="scada-table">
+          <thead>
+            <tr>
+              <th>POINT</th><th>V</th><th>A</th><th>W</th><th>AGE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PV1</td>
+              <td data-m="pv1/voltage">—</td>
+              <td data-m="pv1/current">—</td>
+              <td data-m="pv1/power" data-signed>—</td>
+              <td data-age="pv1/power">—</td>
+            </tr>
+            <tr>
+              <td>BATT</td>
+              <td data-m="battery/voltage">—</td>
+              <td data-m="battery/current" data-signed>—</td>
+              <td data-m="battery/power" data-signed>—</td>
+              <td data-age="battery/power">—</td>
+            </tr>
+            <tr>
+              <td>GRID</td>
+              <td data-m="grid/voltage">—</td>
+              <td data-m="grid/current">—</td>
+              <td data-m="grid/power_ct" data-signed>—</td>
+              <td data-age="grid/power_ct">—</td>
+            </tr>
+            <tr>
+              <td>LOAD</td>
+              <td id="scada-ac-v">—</td>
+              <td id="scada-load-i">—</td>
+              <td data-m="load/power" data-signed>—</td>
+              <td data-age="load/power">—</td>
+            </tr>
+            <tr>
+              <td>INV</td>
+              <td id="scada-inv-v">—</td>
+              <td class="dim">—</td>
+              <td data-m="inverter/power" data-signed>—</td>
+              <td data-age="inverter/power">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="scada-legend">
+          <span><i class="lg-cyan"></i> FEEDER</span>
+          <span><i class="lg-red"></i> LOAD/GRID</span>
+          <span><i class="lg-split"></i> SPLIT BAY</span>
+          <span><i class="lg-lime"></i> LIVE</span>
+          <span><i class="lg-dim"></i> IDLE</span>
+          <span>ORTHOGONAL SLD · MIMIC BAYS</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="settings">
+    <form id="settings-form" method="dialog">
+      <h2>MQTT WebSocket</h2>
+      <p class="hint">Browser clients cannot use port 1883. Enable a WebSocket listener on the broker (usually 9001).</p>
+      <label>Broker URL
+        <input id="cfg-url" type="text" autocomplete="off" spellcheck="false" placeholder="ws://iriv-pi-control:9001">
+      </label>
+      <label>Username
+        <input id="cfg-user" type="text" autocomplete="username">
+      </label>
+      <label>Password
+        <input id="cfg-pass" type="password" autocomplete="current-password">
+      </label>
+      <label>Topic prefix
+        <input id="cfg-prefix" type="text" spellcheck="false" placeholder="iriv/ivt">
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" value="connect" class="primary">Connect</button>
+        <button type="button" id="btn-disconnect">Disconnect</button>
+        <button type="button" id="btn-close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="vendor/mqtt.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@ Also copy these **source-of-truth** files into `reference/`:
 | From (this repo) | To (new repo) |
 |------------------|---------------|
 | `homeassistant/iriv_deye_mqtt.yaml` | `reference/iriv_deye_mqtt.yaml` |
-| `iriv-ioc-config.json` | `reference/iriv-ioc-config.json` |
+| `iriv/iriv-ioc-config.json` | `reference/iriv-ioc-config.json` |
 
 Then tell Cursor: *Read `docs/handoff/HANDOFF.md` and `docs/handoff/mqtt-topics.md` before writing firmware.*
 

@@ -22,7 +22,7 @@ alwaysApply: true
 
 - **Maximum 26 enabled** `pollJobs`. Enabling a **27th** job caused device **reboot** and **all jobs wiped**.
 - Current template: **24** enabled jobs (no PV2 — site has single MPPT string set). Includes Load Current (179) and Inverter Frequency (193).
-- Regenerate only via `python _gen_iriv_jobs.py`. Keep `dataType: 3` (s16) for 16-bit Deye regs — `dataType: 1` produced bogus values ≈ scale.
+- Regenerate only via `python iriv/_gen_iriv_jobs.py`. Keep `dataType: 3` (s16) for 16-bit Deye regs — `dataType: 1` produced bogus values ≈ scale.
 
 ## Field-verified register corrections
 
@@ -36,15 +36,17 @@ alwaysApply: true
 | Batt temp / Inv temp | 182, 91 | scale 0.1, offset **-100** |
 | Poll periods | V/I/P | **1000 ms**; temp/SOC/Hz **10000**; `*_today` **30000** |
 
-## Key files
+## Key paths
 
-- `iriv-ioc-config.json` / `_gen_iriv_jobs.py`
-- `deye-sg06-ivt-emu.py` + `rs485_emu/` (slave emulator for bench)
-- `deye-sg06-nodemcu.yaml` (ESPHome master)
+- `iriv/iriv-ioc-config.json` / `iriv/_gen_iriv_jobs.py`
+- `emulator/deye-sg06-ivt-emu.py` + `emulator/rs485_emu/`
+- `esphome/deye-sg06-nodemcu.yaml`
 - `homeassistant/iriv_deye_mqtt.yaml`
+- `web/` — MQTT WebSocket dashboard
+- `docs/protocol/` — Deye Modbus PDF V118
 - `docs/HANDOFF.md` — full narrative handoff
 - `docs/esp32/README.md` — planned ESP32 UART→RS485 master (stub)
 
 ## Sister project
 
-JK BMS Modbus monitor lives in `jk-pb-rs485-monitor` (115200 / slave 15 / UART1). Do not merge full Deye + JK IRIV job sets onto one gateway without trimming under 26 jobs and using separate RS485 buses.
+JK BMS Modbus monitor lives in `jk-pb-rs485-monitor` (115200 / slave 15 / UART1). Pylon-style BMS bench slave: `jk-pb-rs485-monitor/emulator/bms-pylon-emu.py`. Do not merge full Deye + JK IRIV job sets onto one gateway without trimming under 26 jobs and using separate RS485 buses.

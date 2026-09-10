@@ -4,7 +4,7 @@
 
 ## Goal
 
-Run Modbus RTU **master** on ESP32/S3 (Hardware UART + RS485 transceiver, e.g. MAX3485 / Waveshare) to poll the same Deye holding registers as `iriv-ioc-config.json`, then publish MQTT (or expose HTTP).
+Run Modbus RTU **master** on ESP32/S3 (Hardware UART + RS485 transceiver, e.g. MAX3485 / Waveshare) to poll the same Deye holding registers as `iriv/iriv-ioc-config.json`, then publish MQTT (or expose HTTP).
 
 ## Constraints
 
@@ -22,4 +22,4 @@ Run Modbus RTU **master** on ESP32/S3 (Hardware UART + RS485 transceiver, e.g. M
 
 ## Register list
 
-Start from `_gen_iriv_jobs.py` / `iriv-ioc-config.json` (enabled jobs). Critical: Load Current **179**, Charge/Discharge **70/71**, current scales **0.1** for PV/Grid.
+Start from `iriv/_gen_iriv_jobs.py` / `iriv/iriv-ioc-config.json` (enabled jobs). Critical: Load Current **179**, Charge/Discharge **70/71**, current scales **0.1** for PV/Grid.

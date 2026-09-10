@@ -61,7 +61,7 @@ Battery SOC/V/I for the ESS pack: prefer **inverter** holding registers (CAN alr
 | FC | 03 / 10 |
 | Protocol PDF | [`docs/protocol/Deye SG05 Modbus Protocol.V118.pdf`](docs/protocol/Deye%20SG05%20Modbus%20Protocol.V118.pdf) |
 
-Notable field corrections on SG06: charge/discharge today **70 / 71**; PV/Grid current scale **0.1**; Load Current **179** ×0.01; IRIV max **26** enabled poll jobs (27th → reboot + wipe).
+Notable field corrections on SG06: charge/discharge today **70 / 71**; PV current scale **0.1**; Grid Current **160** ×0.01 (matches Deye logger; ×0.1 was 10× high); Load Current **179** ×0.01; IRIV max **26** enabled poll jobs (27th → reboot + wipe).
 
 ### IRIV
 

@@ -75,7 +75,7 @@ Periods: **V/I/P = 1 s**; status/temp/SOC/grid+inv Hz = **10 s**; energy today =
 | 91 | Inv temp | 0.1, offset -100 |
 | 108 | PV energy today | 0.1 kWh |
 | 109 / 110 / 186 | PV1 V / I / P | 0.1 / **0.1** / 1 |
-| 150 / 160 / 172 | Grid V / I / P_CT | 0.1 / **0.1** / 1 |
+| 150 / 160 / 172 | Grid V / I / P_CT | 0.1 / **0.01** / 1 |
 | 175 / 193 | Inv power / frequency | 1 / 0.01 |
 | 178 / **179** | Load power / **current** | 1 / **0.01** |
 | 182–184, 190–191 | Batt T/V/SOC/P/I | temp offset -100; V 0.01; I 0.01 |

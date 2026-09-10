@@ -111,7 +111,7 @@ jobs = [
     # Grid Hz slow; V / I / P @ 1s
     job("Grid Frequency", 79, scale=0.01, unit="Hz", decimals=2, topic="grid/frequency", period_ms=TEMP_MS),
     job("Grid Voltage", 150, scale=0.1, unit="V", decimals=1, topic="grid/voltage", period_ms=LIVE_MS),
-    job("Grid Current", 160, scale=0.1, unit="A", decimals=2, topic="grid/current", period_ms=LIVE_MS),
+    job("Grid Current", 160, scale=0.01, unit="A", decimals=2, topic="grid/current", period_ms=LIVE_MS),
     job("Grid Power CT", 172, scale=1, unit="W", decimals=0, topic="grid/power_ct", period_ms=LIVE_MS),
     job("Grid Buy Today", 76, scale=0.1, unit="kWh", decimals=1, topic="grid/buy_today", period_ms=ENERGY_MS),
     job("Grid Sell Today", 77, scale=0.1, unit="kWh", decimals=1, topic="grid/sell_today", period_ms=ENERGY_MS),

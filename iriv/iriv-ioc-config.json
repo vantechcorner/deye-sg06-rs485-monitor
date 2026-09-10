@@ -396,7 +396,7 @@
         "count": 1,
         "dataType": 3,
         "byteOrder": 0,
-        "scale": 0.1,
+        "scale": 0.01,
         "offset": 0.0,
         "unit": "A",
         "decimals": 2,

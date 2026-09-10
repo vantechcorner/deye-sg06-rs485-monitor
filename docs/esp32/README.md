@@ -22,4 +22,4 @@ Run Modbus RTU **master** on ESP32/S3 (Hardware UART + RS485 transceiver, e.g. M
 
 ## Register list
 
-Start from `iriv/_gen_iriv_jobs.py` / `iriv/iriv-ioc-config.json` (enabled jobs). Critical: Load Current **179**, Charge/Discharge **70/71**, current scales **0.1** for PV/Grid.
+Start from `iriv/_gen_iriv_jobs.py` / `iriv/iriv-ioc-config.json` (enabled jobs). Critical: Load Current **179**, Charge/Discharge **70/71**, PV current **0.1**, Grid Current **160** ×0.01.

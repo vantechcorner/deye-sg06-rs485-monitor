@@ -34,7 +34,7 @@ REGISTER_META: dict[int, RegisterMeta] = {
     112: RegisterMeta(112, "Pv2Curr", scale=0.1, unit="A", signed=True),
     150: RegisterMeta(150, "GridVolt", scale=0.1, unit="V"),
     154: RegisterMeta(154, "InvVolt", scale=0.1, unit="V"),
-    160: RegisterMeta(160, "GridCurr", scale=0.1, unit="A", signed=True),
+    160: RegisterMeta(160, "GridCurr", scale=0.01, unit="A", signed=True),
     164: RegisterMeta(164, "InvCurr", scale=0.01, unit="A", signed=True),
     172: RegisterMeta(172, "GridCtPower", scale=1.0, unit="W", signed=True),
     175: RegisterMeta(175, "InvActivePower", scale=1.0, unit="W", signed=True),

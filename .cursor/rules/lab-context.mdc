@@ -23,7 +23,7 @@ alwaysApply: true
 - IOC firmware **before V1.2.6**: enabling a **27th** `pollJob` caused device **reboot** and **all jobs wiped**. **V1.2.6** fixes that.
 - Import on **≥ V1.2.6**: `iriv/iriv-ioc-config.json` — **27** enabled jobs, full PV2 (regs **111 / 112 / 187**), Load Current (179), Inverter Frequency (193).
 - Older firmware: `iriv/iriv-ioc-config-26.json` — drops **PV2 Current** only.
-- MQTT in both templates: user `admin`, password `12345678` (`useAuth: true`).
+- Device web login is `system.adminUser` / `adminPassHash` in the IRIV JSON (`admin`, hash exported for password `12345678`). Do not put that password in the browser dashboard. MQTT broker auth stays off unless the broker requires it.
 - Regenerate only via `python iriv/_gen_iriv_jobs.py`. Keep `dataType: 3` (s16) for 16-bit Deye regs — `dataType: 1` produced bogus values ≈ scale.
 
 ## Field-verified register corrections

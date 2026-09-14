@@ -69,7 +69,7 @@ Notable field corrections on SG06: charge/discharge today **70 / 71**; PV curren
 python iriv/_gen_iriv_jobs.py   # regenerates both IRIV JSON files
 ```
 
-Import JSON on Cytron IRIV IOC MQTT Gateway. MQTT base: `iriv/ivt`. Default host in file: `iriv-pi-control`. Broker auth in the template: user `admin`, password `12345678`.
+Import JSON on Cytron IRIV IOC MQTT Gateway. MQTT base: `iriv/ivt`. Default host in file: `iriv-pi-control`. Broker auth is off in the template. Device web login in the JSON is user `admin` (password hash exported for `12345678`).
 
 On firmware **≥ V1.2.6**, import [`iriv/iriv-ioc-config.json`](iriv/iriv-ioc-config.json) — **27** jobs, including PV2 voltage/current/power (regs **111 / 112 / 187**) and Inverter Frequency. Firmware **before V1.2.6** still reboots and wipes the list at job 27; use [`iriv/iriv-ioc-config-26.json`](iriv/iriv-ioc-config-26.json) on those builds (drops only PV2 Current).
 

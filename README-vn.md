@@ -30,7 +30,7 @@ python emulator/deye-sg06-ivt-emu.py --port COM35 --debug --scenario day
 cd web && python -m http.server 8080
 ```
 
-IRIV: import `iriv/iriv-ioc-config.json` trên firmware **≥ V1.2.6** (27 job, đủ PV2). Firmware cũ hơn vẫn reboot + mất config ở job thứ 27 — dùng `iriv/iriv-ioc-config-26.json`. MQTT user `admin`, password `12345678`. V/I/P = 1 s.
+IRIV: import `iriv/iriv-ioc-config.json` trên firmware **≥ V1.2.6** (27 job, đủ PV2). Firmware cũ hơn vẫn reboot + mất config ở job thứ 27 — dùng `iriv/iriv-ioc-config-26.json`. Đăng nhập web thiết bị trong JSON: user `admin`, mật khẩu `12345678`. V/I/P = 1 s.
 
 Dashboard web (MQTT WS): `web/` — mặc định broker `:9001`.
 

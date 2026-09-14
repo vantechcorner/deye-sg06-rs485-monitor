@@ -1,9 +1,9 @@
 {
   "system": {
     "deviceName": "IRIV-IOC Gateway",
-    "adminUser": "vantc",
-    "adminPassHash": "8136ea6fb3e97045",
-    "adminPassSalt": "a94243598486b08ec1dff4c78808f990",
+    "adminUser": "admin",
+    "adminPassHash": "202c4d8984173cbd",
+    "adminPassSalt": "93511c34c360f4002aa6ee835c46ef41",
     "lanAdminEnabled": true
   },
   "network": {
@@ -43,9 +43,9 @@
     "enabled": true,
     "host": "iriv-pi-control",
     "port": 1883,
-    "useAuth": true,
-    "user": "admin",
-    "passEnc": "12345678",
+    "useAuth": false,
+    "user": "",
+    "passEnc": "",
     "clientId": "iriv-ioc-ivt",
     "baseTopic": "iriv/ivt",
     "keepAlive": 60,

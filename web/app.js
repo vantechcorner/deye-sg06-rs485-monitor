@@ -82,8 +82,8 @@ function loadSettings() {
   }
   return {
     url: saved.url || defaultUrl(),
-    user: saved.user || "admin",
-    pass: saved.pass || "12345678",
+    user: saved.user || "",
+    pass: saved.pass || "",
     prefix: saved.prefix || "iriv/ivt",
     view: ["simple", "full", "minimal"].includes(saved.view) ? saved.view : "simple",
   };

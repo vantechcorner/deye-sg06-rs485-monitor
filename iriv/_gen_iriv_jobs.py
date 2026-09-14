@@ -5,7 +5,9 @@ when a 27th poll job is enabled. **V1.2.6** fixes that. Import
 ``iriv-ioc-config.json`` (27 jobs, full PV2) on V1.2.6+.
 ``iriv-ioc-config-26.json`` drops PV2 Current and is only for older firmware.
 
-MQTT auth in both files: user ``admin``, password ``12345678``.
+Device web login in both files: user ``admin``,
+password hash for ``12345678`` (``adminPassHash`` / ``adminPassSalt``).
+Do not put that password on the browser dashboard.
 
 Periods:
   LIVE_MS  1000  — Voltage / Current / Power only
@@ -147,13 +149,17 @@ def write_config(dest: Path, enabled_jobs: list[dict]) -> None:
     out["rtu"]["pollJobs"] = slots
     out["rtu"]["link"]["baud"] = 9600
     out["rtu"]["link"]["responseTimeoutMs"] = 800
+    out["system"]["adminUser"] = "admin"
+    out["system"]["adminPassHash"] = "202c4d8984173cbd"
+    out["system"]["adminPassSalt"] = "93511c34c360f4002aa6ee835c46ef41"
+    out["system"]["lanAdminEnabled"] = True
     out["mqtt"]["enabled"] = True
     out["mqtt"]["host"] = out.get("mqtt", {}).get("host") or "iriv-pi-control"
     out["mqtt"]["baseTopic"] = "iriv/ivt"
     out["mqtt"]["clientId"] = "iriv-ioc-ivt"
-    out["mqtt"]["useAuth"] = True
-    out["mqtt"]["user"] = "admin"
-    out["mqtt"]["passEnc"] = "12345678"
+    out["mqtt"]["useAuth"] = False
+    out["mqtt"]["user"] = ""
+    out["mqtt"]["passEnc"] = ""
     # Many 1 s publishes — leave headroom vs default 20
     out["mqtt"]["globalRateMax"] = 60
     out["mqtt"]["globalBurst"] = 120

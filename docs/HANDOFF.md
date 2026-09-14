@@ -59,7 +59,7 @@ JK-PB1A16S10P ──CAN──► Deye SG06 ──RS485@9600──► IRIV (maste
 | Rate | Raise `globalRateMax` / `globalBurst` when many 1 s jobs |
 | Regenerate | `python iriv/_gen_iriv_jobs.py` — do not hand-edit dozens of jobs if avoidable |
 
-Current job set on **V1.2.6+** (**27** enabled, `iriv-ioc-config.json`): PV1 + **PV2** V/I/P, **Load Current (179)**, and **Inverter Frequency (193)**. MQTT user `admin`. Older firmware: import the 26-job file (no PV2 Current).
+Current job set on **V1.2.6+** (**27** enabled, `iriv-ioc-config.json`): PV1 + **PV2** V/I/P, **Load Current (179)**, and **Inverter Frequency (193)**. Older firmware: import the 26-job file (no PV2 Current).
 
 Periods: **V/I/P = 1 s**; status/temp/SOC/grid+inv Hz = **10 s**; energy today = **30 s**.
 

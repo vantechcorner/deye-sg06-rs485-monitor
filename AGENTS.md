@@ -17,7 +17,7 @@ Monitor a **Deye SG05/SG06** hybrid inverter via **Modbus RTU slave** on the dat
 
 - **One Modbus master per RS485 bus** (IRIV **or** ESPHome **or** ESP32 — never two).
 - Baud **9600** 8N1, slave **1**.
-- Cytron IRIV IOC: **max 26 enabled poll jobs**. A 27th enabled job caused **reboot + wipe** of all jobs in lab firmware.
+- Cytron IRIV IOC firmware **before V1.2.6**: a 27th enabled poll job caused **reboot + wipe**. **V1.2.6** fixes that. Import `iriv/iriv-ioc-config.json` (27 jobs) on V1.2.6+; use `iriv-ioc-config-26.json` only on older firmware.
 - Prefer battery SOC/V/I from **inverter** registers when the pack is on **CAN** to Deye.
 - Regenerate IRIV jobs only via `python iriv/_gen_iriv_jobs.py`.
 

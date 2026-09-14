@@ -38,7 +38,7 @@ JK-PB1A16S10P ──CAN──► Deye SG06 ──RS485@9600──► IRIV (maste
 
 | Path | Role |
 |------|------|
-| `iriv/` | `_gen_iriv_jobs.py`, `iriv-ioc-config.json` |
+| `iriv/` | `_gen_iriv_jobs.py`, `iriv-ioc-config.json` (import on firmware ≥ V1.2.6), `iriv-ioc-config-26.json` (older firmware) |
 | `emulator/` | `deye-sg06-ivt-emu.py`, `rs485_emu/` (Deye profile only) |
 | `esphome/` | NodeMCU Modbus master YAML |
 | `homeassistant/` | MQTT sensor package |
@@ -52,14 +52,14 @@ JK-PB1A16S10P ──CAN──► Deye SG06 ──RS485@9600──► IRIV (maste
 
 | Finding | Detail |
 |---------|--------|
-| Job cap | **≤26 enabled** poll jobs. Job **#27** → reboot + **empty** job list |
+| Job cap | Firmware **before V1.2.6**: job **#27** → reboot + **empty** job list. **V1.2.6** fixes that. Import `iriv-ioc-config.json` (27 jobs, full PV2) on V1.2.6+. Use `iriv-ioc-config-26.json` only on older firmware (drops PV2 Current, keeps Inverter Frequency). |
 | dataType | Use **s16** (`dataType: 3`) for 16-bit Deye holdings. `dataType: 1` → values ≈ scale only |
 | Topics | One scale per job → hierarchy `iriv/ivt/battery/soc`, `pv1/power`, `load/current`, … |
 | Host | MQTT host often `iriv-pi-control` |
 | Rate | Raise `globalRateMax` / `globalBurst` when many 1 s jobs |
 | Regenerate | `python iriv/_gen_iriv_jobs.py` — do not hand-edit dozens of jobs if avoidable |
 
-Current job set (**24** enabled): no PV2; includes **Load Current (179)** and **Inverter Frequency (193)**.
+Current job set on **V1.2.6+** (**27** enabled, `iriv-ioc-config.json`): PV1 + **PV2** V/I/P, **Load Current (179)**, and **Inverter Frequency (193)**. MQTT user `admin`. Older firmware: import the 26-job file (no PV2 Current).
 
 Periods: **V/I/P = 1 s**; status/temp/SOC/grid+inv Hz = **10 s**; energy today = **30 s**.
 
@@ -75,6 +75,7 @@ Periods: **V/I/P = 1 s**; status/temp/SOC/grid+inv Hz = **10 s**; energy today =
 | 91 | Inv temp | 0.1, offset -100 |
 | 108 | PV energy today | 0.1 kWh |
 | 109 / 110 / 186 | PV1 V / I / P | 0.1 / **0.1** / 1 |
+| 111 / 112 / 187 | PV2 V / I / P | 0.1 / **0.1** / 1 |
 | 150 / 160 / 172 | Grid V / I / P_CT | 0.1 / **0.01** / 1 |
 | 175 / 193 | Inv power / frequency | 1 / 0.01 |
 | 178 / **179** | Load power / **current** | 1 / **0.01** |

@@ -18,10 +18,12 @@ alwaysApply: true
 - **One master per bus.** Do not run IRIV and ESPHome on the same A/B.
 - Do not put a Modbus/CAN sniffer master on the Deye↔JK **CAN** cable for normal monitoring.
 
-## IRIV hard limit (critical)
+## IRIV job cap (firmware-dependent)
 
-- **Maximum 26 enabled** `pollJobs`. Enabling a **27th** job caused device **reboot** and **all jobs wiped**.
-- Current template: **24** enabled jobs (no PV2 — site has single MPPT string set). Includes Load Current (179) and Inverter Frequency (193).
+- IOC firmware **before V1.2.6**: enabling a **27th** `pollJob` caused device **reboot** and **all jobs wiped**. **V1.2.6** fixes that.
+- Import on **≥ V1.2.6**: `iriv/iriv-ioc-config.json` — **27** enabled jobs, full PV2 (regs **111 / 112 / 187**), Load Current (179), Inverter Frequency (193).
+- Older firmware: `iriv/iriv-ioc-config-26.json` — drops **PV2 Current** only.
+- MQTT in both templates: user `admin`, password `12345678` (`useAuth: true`).
 - Regenerate only via `python iriv/_gen_iriv_jobs.py`. Keep `dataType: 3` (s16) for 16-bit Deye regs — `dataType: 1` produced bogus values ≈ scale.
 
 ## Field-verified register corrections
@@ -29,7 +31,8 @@ alwaysApply: true
 | Topic | Reg | Scale / note |
 |-------|-----|----------------|
 | Charge / Discharge today | **70 = charge**, **71 = discharge** | 0.1 kWh (PDF V118 was swapped vs SG06) |
-| PV / Grid current | 110, 112, 160 | **0.1** A (not 0.01) |
+| PV current | 110, 112 | **0.1** A (not 0.01) |
+| Grid current | 160 | **0.01** A (×0.1 was 10× high vs Deye logger) |
 | Load current | **179** | 0.01 A, s16 |
 | Load power | 178 | 1 W |
 | Inverter frequency | 193 | 0.01 Hz |
@@ -38,7 +41,9 @@ alwaysApply: true
 
 ## Key paths
 
-- `iriv/iriv-ioc-config.json` / `iriv/_gen_iriv_jobs.py`
+- `iriv/iriv-ioc-config.json` — import on firmware ≥ V1.2.6 (27 jobs, full PV2)
+- `iriv/iriv-ioc-config-26.json` — older firmware only (no PV2 Current)
+- `iriv/_gen_iriv_jobs.py`
 - `emulator/deye-sg06-ivt-emu.py` + `emulator/rs485_emu/`
 - `esphome/deye-sg06-nodemcu.yaml`
 - `homeassistant/iriv_deye_mqtt.yaml`
@@ -49,4 +54,4 @@ alwaysApply: true
 
 ## Sister project
 
-JK BMS Modbus monitor lives in `jk-pb-rs485-monitor` (115200 / slave 15 / UART1). Pylon-style BMS bench slave: `jk-pb-rs485-monitor/emulator/bms-pylon-emu.py`. Do not merge full Deye + JK IRIV job sets onto one gateway without trimming under 26 jobs and using separate RS485 buses.
+JK BMS Modbus monitor lives in `jk-pb-rs485-monitor` (115200 / slave 15 / UART1). Pylon-style BMS bench slave: `jk-pb-rs485-monitor/emulator/bms-pylon-emu.py`. Do not merge full Deye + JK IRIV job sets onto one gateway. Use separate RS485 buses. A 27th enabled job still wipes firmware older than V1.2.6.

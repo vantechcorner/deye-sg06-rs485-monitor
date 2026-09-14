@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 | Path | Contents |
 |------|----------|
-| [`iriv/`](iriv/) | `iriv-ioc-config.json`, `_gen_iriv_jobs.py` |
+| [`iriv/`](iriv/) | `iriv-ioc-config.json` (import on firmware ≥ V1.2.6), `iriv-ioc-config-26.json` (older firmware), `_gen_iriv_jobs.py` |
 | [`emulator/`](emulator/) | Deye Modbus **slave** emulator + `rs485_emu/` |
 | [`esphome/`](esphome/) | `deye-sg06-nodemcu.yaml` |
 | [`homeassistant/`](homeassistant/) | MQTT sensors for `iriv/ivt/#` |
@@ -61,17 +61,19 @@ Battery SOC/V/I for the ESS pack: prefer **inverter** holding registers (CAN alr
 | FC | 03 / 10 |
 | Protocol PDF | [`docs/protocol/Deye SG05 Modbus Protocol.V118.pdf`](docs/protocol/Deye%20SG05%20Modbus%20Protocol.V118.pdf) |
 
-Notable field corrections on SG06: charge/discharge today **70 / 71**; PV current scale **0.1**; Grid Current **160** ×0.01 (matches Deye logger; ×0.1 was 10× high); Load Current **179** ×0.01; IRIV max **26** enabled poll jobs (27th → reboot + wipe).
+Notable field corrections on SG06: charge/discharge today **70 / 71**; PV current scale **0.1**; Grid Current **160** ×0.01 (matches Deye logger; ×0.1 was 10× high); Load Current **179** ×0.01. IOC firmware **before V1.2.6** wiped all jobs if a 27th poll job was enabled. **V1.2.6** fixes that.
 
 ### IRIV
 
 ```bash
-python iriv/_gen_iriv_jobs.py   # regenerates iriv/iriv-ioc-config.json
+python iriv/_gen_iriv_jobs.py   # regenerates both IRIV JSON files
 ```
 
-Import JSON on Cytron IRIV IOC MQTT Gateway. MQTT base: `iriv/ivt`. Default host in file: `iriv-pi-control`.
+Import JSON on Cytron IRIV IOC MQTT Gateway. MQTT base: `iriv/ivt`. Default host in file: `iriv-pi-control`. Broker auth in the template: user `admin`, password `12345678`.
 
-Periods: **V/I/P = 1 s**; temp/SOC/Hz = 10 s; `*_today` = 30 s. No PV2 jobs (single-MPPT site).
+On firmware **≥ V1.2.6**, import [`iriv/iriv-ioc-config.json`](iriv/iriv-ioc-config.json) — **27** jobs, including PV2 voltage/current/power (regs **111 / 112 / 187**) and Inverter Frequency. Firmware **before V1.2.6** still reboots and wipes the list at job 27; use [`iriv/iriv-ioc-config-26.json`](iriv/iriv-ioc-config-26.json) on those builds (drops only PV2 Current).
+
+Periods: **V/I/P = 1 s**; temp/SOC/Hz = 10 s; `*_today` = 30 s.
 
 ### Emulator
 

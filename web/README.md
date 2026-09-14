@@ -10,7 +10,7 @@ From this `web/` folder:
 python -m http.server 8080
 ```
 
-Open `http://127.0.0.1:8080`. Gear icon → set the broker WebSocket URL (default `ws://<this-host>:9001`) → Connect.
+Open `http://127.0.0.1:8080`. Gear icon → broker WebSocket URL (default `ws://<this-host>:9001`). Default login is `admin` / `12345678` (overridden if the browser already saved other credentials) → Connect.
 
 Layouts (top-right toggle, remembered in the browser):
 
